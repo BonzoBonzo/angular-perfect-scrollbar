@@ -1,3 +1,5 @@
+var Ps = window.PerfectScrollbar;
+
 angular.module('perfect_scrollbar', []).directive('perfectScrollbar',
   ['$parse', '$window', function($parse, $window) {
     //Ps options to test against when creating options{}
@@ -27,12 +29,12 @@ angular.module('perfect_scrollbar', []).directive('perfectScrollbar',
         }
 
         $scope.$evalAsync(function() {
-          $elem.perfectScrollbar(options);
+          Ps.initialize(el, options);
           var onScrollHandler = $parse($attr.onScroll)
-          $elem.scroll(function(){
-            var scrollTop = $elem.scrollTop()
+          $elem.on('scroll', function(){
+            var scrollTop = el.scrollTop;
             var scrollHeight = $elem.prop('scrollHeight') - $elem.height()
-            var scrollLeft = $elem.scrollLeft()
+            var scrollLeft = el.scrollLeft;
             var scrollWidth = $elem.prop('scrollWidth') - $elem.width()
 
             $scope.$apply(function() {
@@ -61,7 +63,7 @@ angular.module('perfect_scrollbar', []).directive('perfectScrollbar',
                 $($elem).scrollTop($($elem).prop("scrollHeight"));
               }, 100);
             }
-            $elem.perfectScrollbar('update');
+            Ps.update(el);
           });
         }
 
