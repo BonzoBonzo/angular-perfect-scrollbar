@@ -2,7 +2,6 @@ var Ps = require('perfect-scrollbar');
 
 angular.module('perfect_scrollbar', []).directive('perfectScrollbar',
   ['$parse', '$window', function($parse, $window) {
-
     //Ps options to test against when creating options{}
     var psOptions = [
       'wheelSpeed', 'wheelPropagation', 'minScrollbarLength', 'useBothWheelAxes',
@@ -30,28 +29,41 @@ angular.module('perfect_scrollbar', []).directive('perfectScrollbar',
         }
 
         $scope.$evalAsync(function() {
-          Ps.initialize(el, options);
-          var onScrollHandler = $parse($attr.onScroll);
-          $elem.on('scroll', function(){
-            var scrollTop = el.scrollTop;
-            var scrollHeight = el.scrollHeight - el.clientHeight;
+          $elem.perfectScrollbar(options);
+          var onScrollHandler = $parse($attr.onScroll)
+          $elem.scroll(function(){
+            var scrollTop = $elem.scrollTop()
+            var scrollHeight = $elem.prop('scrollHeight') - $elem.height()
+            var scrollLeft = $elem.scrollLeft()
+            var scrollWidth = $elem.prop('scrollWidth') - $elem.width()
+
             $scope.$apply(function() {
               onScrollHandler($scope, {
                 scrollTop: scrollTop,
-                scrollHeight: scrollHeight
+                scrollHeight: scrollHeight,
+                scrollLeft: scrollLeft,
+                scrollWidth: scrollWidth
               })
-            })
+            });
           });
+        });
+
+        $scope.$watch(function() {
+          return $elem.prop('scrollHeight');
+        }, function(newValue, oldValue) {
+          if (newValue) {
+            update('contentSizeChange');
+          }
         });
 
         function update(event) {
           $scope.$evalAsync(function() {
             if ($attr.scrollDown == 'true' && event != 'mouseenter') {
               setTimeout(function () {
-                el.scrollTop = el.scrollHeight;
+                $($elem).scrollTop($($elem).prop("scrollHeight"));
               }, 100);
             }
-            Ps.update(el);
+            $elem.perfectScrollbar('update');
           });
         }
 
@@ -74,7 +86,6 @@ angular.module('perfect_scrollbar', []).directive('perfectScrollbar',
           jqWindow.off('resize', update);
           Ps.destroy(el);
         });
-
       }
     };
-  }]);
+}]);
