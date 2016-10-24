@@ -19,6 +19,7 @@ angular.module('perfect_scrollbar', []).directive('perfectScrollbar',
         var el = $elem[0];
         var jqWindow = angular.element($window);
         var options = {};
+        var previousDistanceFromBottom = 0;
 
         //search Ps lib options passed as attrs to wrapper
         for (var i=0, l=psOptions.length; i<l; i++) {
@@ -36,6 +37,7 @@ angular.module('perfect_scrollbar', []).directive('perfectScrollbar',
             var scrollHeight = el.scrollHeight - el.clientHeight;
             var scrollLeft = el.scrollLeft;
             var scrollWidth = el.scrollWidth - el.clientWidth;
+            previousDistanceFromBottom = scrollHeight - scrollTop;
 
             $scope.$apply(function() {
               onScrollHandler($scope, {
@@ -49,7 +51,7 @@ angular.module('perfect_scrollbar', []).directive('perfectScrollbar',
         });
 
         $scope.$watch(function() {
-          return $elem.prop('scrollHeight');
+          return el.scrollHeight;
         }, function(newValue, oldValue) {
           if (newValue) {
             update('contentSizeChange');
@@ -58,10 +60,8 @@ angular.module('perfect_scrollbar', []).directive('perfectScrollbar',
 
         function update(event) {
           $scope.$evalAsync(function() {
-            if ($attr.scrollDown == 'true' && event != 'mouseenter') {
-              setTimeout(function () {
-                $($elem).scrollTop($($elem).prop("scrollHeight"));
-              }, 100);
+            if ($attr.scrollDown == 'true' && event != 'mouseenter' && previousDistanceFromBottom < 50) {
+              el.scrollTop = el.scrollHeight;
             }
             Ps.update(el);
           });
